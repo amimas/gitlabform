@@ -1,8 +1,7 @@
 From python:3.12
 
-WORKDIR /gitlabform
+COPY ../README.md ../version ../setup.py /gitlabform-deps/
 
-COPY ../ .
-
-RUN python setup.py develop && \
+RUN cd /gitlabform-deps && \
+  python setup.py develop && \
   pip install -e '.[test]'
