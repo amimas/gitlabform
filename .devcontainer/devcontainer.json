@@ -1,0 +1,7 @@
+{
+    "name": "gitlabform development",
+    "dockerComposeFile": "compose.yml",
+    "service": "gitlabform-dev",
+    "workspaceFolder": "/workspace",
+    "shutdownAction": "stopCompose"
+}

@@ -3,6 +3,9 @@ services:
     build:
       context: ../
       dockerfile: ./.devcontainer/dev.Dockerfile
+    command: sleep infinity
+    volumes:
+      - ..:/workspace:cached
   gitlabform-docs:
     # Configuration for GitLabForm docs site
     build:
@@ -10,19 +13,19 @@ services:
       dockerfile: ./.devcontainer/docs.Dockerfile
     ports:
       - "8000:8000"
-  gitlab:
-    # Configuration for starting GitLab instance
-    image: gitlab/gitlab-ee:latest
-    restart: always
-    shm_size: '256m'
-    ports:
-      - "443:443"
-      - "80:80"
-      - "22:22"
-    environment:
-      GITLAB_OMNIBUS_CONFIG: |
-        gitlab_rails['initial_root_password'] = 'mK9JnG7jwYdFcBNoQ3W3'
-        registry['enable'] = false
-        grafana['enable'] = false
-        prometheus_monitoring['enable'] = false
+  # gitlab:
+  #   # Configuration for starting GitLab instance
+  #   image: gitlab/gitlab-ee:latest
+  #   restart: always
+  #   shm_size: '256m'
+  #   ports:
+  #     - "443:443"
+  #     - "80:80"
+  #     - "22:22"
+  #   environment:
+  #     GITLAB_OMNIBUS_CONFIG: |
+  #       gitlab_rails['initial_root_password'] = 'mK9JnG7jwYdFcBNoQ3W3'
+  #       registry['enable'] = false
+  #       grafana['enable'] = false
+  #       prometheus_monitoring['enable'] = false
       

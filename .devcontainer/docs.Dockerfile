@@ -1,9 +1,9 @@
 From python:3.12
 
-WORKDIR /gitlabform
+WORKDIR /gitlabform-docs
 
-COPY ../docs ./docs
-COPY ../.overrides ./.overrides
+COPY ../docs ./docs/
+COPY ../.overrides ./.overrides/
 COPY ../setup.py .
 COPY ../README.md .
 COPY ../mkdocs.yml .
