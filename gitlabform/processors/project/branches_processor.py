@@ -26,6 +26,17 @@ class BranchesProcessor(AbstractProcessor):
         self.custom_diff_analyzers["unprotect_access_levels"] = self.naive_access_level_diff_analyzer
 
     def _can_proceed(self, project_or_group: str, configuration: dict):
+        try:
+            project: Project = self.gl.get_project_by_path_cached(project_or_group)
+            if project.repository_access_level == "disabled":
+                verbose(f"Skipping processing branches for project '{project_or_group}' as its repository is disabled.")
+                return False
+        except GitlabGetError:
+            warning(
+                f"Could not fetch project '{project_or_group}' to check repository status. Skipping branches processing."
+            )
+            return False
+
         for branch in sorted(configuration["branches"]):
             branch_config = configuration["branches"][branch]
             if branch_config.get("protected") is None:
