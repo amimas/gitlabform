@@ -15,7 +15,7 @@ pytestmark = pytest.mark.requires_license
 
 class TestBranches:
 
-    def test__modify_force_push_and_code_owner_approvals(self, project, branch):
+    def test__modify_force_push_and_code_owner_approvals(self, project, branch) -> None:
         try:
             protected_branch = project.protectedbranches.get(branch)
             protected_branch.delete()
@@ -72,7 +72,7 @@ class TestBranches:
 
     def test__can_add_users_by_username_or_id_to_branch_protection_rules(
         self, project_for_function, branch_for_function, gl
-    ):
+    ) -> None:
         first_user = create_project_member(gl, project_for_function)
         second_user = create_project_member(gl, project_for_function)
         third_user = create_project_member(gl, project_for_function)
@@ -124,7 +124,7 @@ class TestBranches:
 
     def test__does_not_attempt_to_modify_unchanged_branch_protection_when_users_are_present(
         self, project_for_function, branch_for_function, gl
-    ):
+    ) -> None:
         # https://github.com/gitlabform/gitlabform/issues/1101
         first_user = create_project_member(gl, project_for_function, AccessLevel.MAINTAINER.value)
         second_user = create_project_member(gl, project_for_function, AccessLevel.MAINTAINER.value)
@@ -162,7 +162,7 @@ class TestBranches:
                 third_user.id,
             ]
         )
-        assert len(merge_access_user_ids) == 0
+        assert not merge_access_user_ids
 
         config_with_more_user_ids = f"""
         projects_and_groups:
@@ -201,9 +201,11 @@ class TestBranches:
                 third_user.id,
             ]
         )
-        assert len(merge_access_user_ids) == 0
+        assert not merge_access_user_ids
 
-    def test__can_remove_users_from_branch_protection_rules(self, project_for_function, branch_for_function, gl):
+    def test__can_remove_users_from_branch_protection_rules(
+        self, project_for_function, branch_for_function, gl
+    ) -> None:
         first_user = create_project_member(gl, project_for_function, AccessLevel.MAINTAINER.value)
         second_user = create_project_member(gl, project_for_function, AccessLevel.MAINTAINER.value)
         third_user = create_project_member(gl, project_for_function, AccessLevel.MAINTAINER.value)
@@ -241,7 +243,7 @@ class TestBranches:
                 third_user.id,
             ]
         )
-        assert len(merge_access_user_ids) == 0
+        assert not merge_access_user_ids
 
         # Remove second_user from being allowed to push
         config_with_more_user_ids = f"""
@@ -279,11 +281,11 @@ class TestBranches:
                 third_user.id,
             ]
         )
-        assert len(merge_access_user_ids) == 0
+        assert not merge_access_user_ids
 
     def test__can_add_users_and_group_to_branch_protection_rules(
         self, project, group_for_function, branch, make_user, gl
-    ):
+    ) -> None:
         """
         Configure a branch protection setting that depends on users or groups (i.e. allowed_to_merge)
         Make sure the setting is applied successfully because users must be members
@@ -365,7 +367,9 @@ class TestBranches:
         )
         assert merge_access_group_ids == sorted([group_for_function.id])
 
-    def test__modify_protection_between_standard_and_premium_settings(self, project, group_for_function, branch, gl):
+    def test__modify_protection_between_standard_and_premium_settings(
+        self, project, group_for_function, branch, gl
+    ) -> None:
         """
         Set protection using the "standard" push_access_level fields, modify using the "Premium" feature allowed_to_push,
         and then revert back using "standard" features: https://docs.gitlab.com/api/protected_branches/#protect-repository-branches
@@ -467,7 +471,7 @@ class TestBranches:
 
     def test__if_protected_branch_config_does_not_change_then_branch_approval_rules_are_retained(
         self, project_for_function, branch_for_function
-    ):
+    ) -> None:
         # Previously we have unprotected and re-protected branches in order to apply config changes
         # and even if config did not change, branches_processor would thing it still needed a change.
         # This resulted in loss of manual approval rules: https://github.com/gitlabform/gitlabform/issues/1061
@@ -545,7 +549,7 @@ class TestBranches:
 
         # If the branch was unprotected and then re-protected the branch id of the protected branch would likely differ
         # from that stored in the branch approval rule
-        protected_branch: ProjectProtectedBranch = project_for_function.protectedbranches.get(branch_for_function)
+        protected_branch = project_for_function.protectedbranches.get(branch_for_function)
 
         approval_rules = project_for_function.approvalrules.list(get_all=True)
         assert len(approval_rules) == 1
