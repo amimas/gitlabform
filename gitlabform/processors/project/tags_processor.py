@@ -11,6 +11,7 @@ class TagsProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab, strict: bool):
         super().__init__("tags", gitlab)
         self.strict = strict
+        self.requires_repository = True
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         project = self.gl.get_project_by_path_cached(name=project_and_group, lazy=True)

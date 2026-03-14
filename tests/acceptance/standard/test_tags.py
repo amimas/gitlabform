@@ -4,6 +4,7 @@ from gitlabform.gitlab import AccessLevel
 from tests.acceptance import (
     run_gitlabform,
 )
+from tests.acceptance.conftest import GitLabFormLogs
 
 
 @pytest.fixture(scope="function")
@@ -30,6 +31,36 @@ def tags(project):
 
 
 class TestTags:
+    def test__tags_skipped_for_repo_disabled_project(
+        self, project_for_function, gitlabform_logs: GitLabFormLogs
+    ) -> None:
+        # Disable repository for the project to ensure that tags processing is skipped
+        # In order to disable repository, we also need to disable builds and merge requests
+        # as they depend on the repository being enabled
+        project_for_function.merge_requests_access_level = "disabled"
+        project_for_function.builds_access_level = "disabled"
+        project_for_function.repository_access_level = "disabled"
+        project_for_function.save()
+
+        config = f"""
+        projects_and_groups:
+          "{project_for_function.path_with_namespace}":
+            tags:
+              "v1.0.0":
+                protected: true
+        """
+
+        try:
+            run_gitlabform(config, project_for_function.path_with_namespace)
+        except SystemExit as e:
+            pytest.fail(f"gitlabform exited unexpectedly with code {e.code}")
+
+        expected_log_message = f"Skipping processing tags for project '{project_for_function.path_with_namespace}' as its repository is disabled."
+
+        assert any(
+            expected_log_message in log for log in gitlabform_logs.debug
+        ), "Expected log message not found in gitlabform debug logs"
+
     def test__protect_single_tag(self, project, tags):
         config = f"""
         projects_and_groups:

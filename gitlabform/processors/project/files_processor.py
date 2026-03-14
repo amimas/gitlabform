@@ -25,6 +25,7 @@ class FilesProcessor(AbstractProcessor):
         self.config = config
         self.strict = strict
         self.branch_processor = BranchesProcessor(gitlab, strict)
+        self.requires_repository = True
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         for file in sorted(configuration["files"]):

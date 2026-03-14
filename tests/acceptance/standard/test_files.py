@@ -10,6 +10,7 @@ from tests.acceptance import (
     run_gitlabform,
     DEFAULT_README,
 )
+from tests.acceptance.conftest import GitLabFormLogs
 
 
 @pytest.fixture(scope="function")
@@ -55,6 +56,39 @@ def file2(request):
 
 
 class TestFiles:
+    def test__files_skipped_for_repo_disabled_project(
+        self, project_for_function, gitlabform_logs: GitLabFormLogs
+    ) -> None:
+        # Disable repository for the project to ensure that files processing is skipped
+        # In order to disable repository, we also need to disable builds and merge requests
+        # as they depend on the repository being enabled
+        project_for_function.merge_requests_access_level = "disabled"
+        project_for_function.builds_access_level = "disabled"
+        project_for_function.repository_access_level = "disabled"
+        project_for_function.save()
+
+        config = f"""
+        projects_and_groups:
+          "{project_for_function.path_with_namespace}":
+            files:
+              "VERSION":
+                overwrite: true
+                branches:
+                  - main
+                content: "1.0.0"
+        """
+
+        try:
+            run_gitlabform(config, project_for_function.path_with_namespace)
+        except SystemExit as e:
+            pytest.fail(f"gitlabform exited unexpectedly with code {e.code}")
+
+        expected_log_message = f"Skipping processing files for project '{project_for_function.path_with_namespace}' as its repository is disabled."
+
+        assert any(
+            expected_log_message in log for log in gitlabform_logs.debug
+        ), "Expected log message not found in gitlabform debug logs"
+
     def test__set_file_specific_branch(self, project, branch):
         set_file_specific_branch = f"""
         projects_and_groups:
