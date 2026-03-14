@@ -3,8 +3,8 @@ from logging import debug
 from typing import Callable, Union
 
 import requests
-from cli_ui import debug as verbose
-
+from cli_ui import debug as verbose, warning
+from gitlab import GitlabGetError
 from gitlabform.gitlab import GitLab, PythonGitlab
 from gitlabform.gitlab import GitlabWrapper
 from gitlabform.output import EffectiveConfigurationFile
@@ -15,11 +15,16 @@ class AbstractProcessor(ABC):
     def __init__(self, configuration_name: str, gitlab: GitLab):
         self.configuration_name = configuration_name
         self.gitlab = gitlab
+
+        # The 'gl' attribute is a python-gitlab instance, which is preferred for API calls.
+        # It's initialized here to avoid breaking existing processors that might still use 'self.gitlab'.
+        self.gl: PythonGitlab = GitlabWrapper(self.gitlab).get_gitlab()
+
+        self.requires_repository: bool = False
         self.custom_diff_analyzers: dict[
             str,
             Callable[[str, list[dict[str, Union[str, int]]], list[dict[str, int]]], bool],
         ] = {}
-        self.gl: PythonGitlab = GitlabWrapper(self.gitlab).get_gitlab()
 
     @configuration_to_safe_dict
     def process(
@@ -180,6 +185,27 @@ class AbstractProcessor(ABC):
         return False
 
     def _can_proceed(self, project_or_group: str, configuration: dict):
+        """
+        Checks if the processor can proceed with processing the configuration for the given project or group.
+        This method performs a repository access check for projects.
+        Individual processors can override this method to add custom checks,
+        but should call `super()._can_proceed()` first.
+        """
+        if not self.requires_repository:
+            return True
+
+        try:
+            project = self.gl.get_project_by_path_cached(project_or_group)
+            if project.repository_access_level == "disabled":
+                verbose(
+                    f"Skipping processing {self.configuration_name} for project '{project_or_group}' as its repository is disabled."
+                )
+                return False
+        except GitlabGetError:
+            warning(
+                f"Could not fetch project '{project_or_group}' to check repository status. Skipping {self.configuration_name} processing."
+            )
+            return False
         return True
 
 

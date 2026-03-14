@@ -16,6 +16,7 @@ class BranchesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab, strict: bool):
         super().__init__("branches", gitlab)
         self.strict = strict
+        self.requires_repository = True
 
         # Protected Branch API: https://docs.gitlab.com/api/protected_branches/#update-a-protected-branch
         # Behind the scenes gitlab will map "allowed_to_merge" and "merge_access_level" to "merge_access_levels"
@@ -25,16 +26,8 @@ class BranchesProcessor(AbstractProcessor):
         self.custom_diff_analyzers["push_access_levels"] = self.naive_access_level_diff_analyzer
         self.custom_diff_analyzers["unprotect_access_levels"] = self.naive_access_level_diff_analyzer
 
-    def _can_proceed(self, project_or_group: str, configuration: dict):
-        try:
-            project: Project = self.gl.get_project_by_path_cached(project_or_group)
-            if project.repository_access_level == "disabled":
-                verbose(f"Skipping processing branches for project '{project_or_group}' as its repository is disabled.")
-                return False
-        except GitlabGetError:
-            warning(
-                f"Could not fetch project '{project_or_group}' to check repository status. Skipping branches processing."
-            )
+    def _can_proceed(self, project_or_group: str, configuration: dict) -> bool:
+        if not super()._can_proceed(project_or_group, configuration):
             return False
 
         for branch in sorted(configuration["branches"]):
