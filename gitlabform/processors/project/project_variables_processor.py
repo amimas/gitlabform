@@ -18,6 +18,8 @@ class ProjectVariablesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("variables", gitlab)
         self._variables_processor = VariablesProcessor(self._needs_update)
+        self.requires_repository = True
+        self.requires_ci_cd = True
 
     def _process_configuration(self, project_and_group: str, configuration: Dict[str, Any]) -> None:
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
@@ -31,18 +33,6 @@ class ProjectVariablesProcessor(AbstractProcessor):
             configured_variables.pop("enforce")
 
         self._variables_processor.process_variables(project, configured_variables, enforce_mode)
-
-    def _can_proceed(self, project_or_group: str, configuration: Dict[str, Any]) -> bool:
-        """Check if builds are enabled for the project."""
-        try:
-            project: Project = self.gl.get_project_by_path_cached(project_or_group)
-            if project.builds_access_level == "disabled":
-                warning("Builds disabled in this project so I can't set variables here.")
-                return False
-            return True
-        except GitlabGetError:
-            warning(f"Cannot get project settings for {project_or_group}")
-            return False
 
     def _print_diff(
         self,

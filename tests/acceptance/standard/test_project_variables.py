@@ -4,6 +4,7 @@ from unittest.mock import patch
 from gitlab.exceptions import GitlabListError
 
 from tests.acceptance import run_gitlabform
+from tests.acceptance.conftest import GitLabFormLogs
 
 
 class TestVariables:
@@ -13,31 +14,32 @@ class TestVariables:
     using gitlabform configuration.
     """
 
-    @pytest.mark.skip(
-        reason=(
-            "GitLab API behaviour changed in version 17.7.0."
-            " Disable this test until more clarification is available."
-            " Track this issue in GitLab at https://gitlab.com/gitlab-org/gitlab/-/issues/511237"
-        )
-    )
-    def test__builds_disabled(self, project):
-        config_builds_not_enabled = f"""
+    def test__variables_skipped_for_cicd_disabled_project(
+        self, project_for_function, gitlabform_logs: GitLabFormLogs
+    ) -> None:
+        # Disable CI/CD for the project to ensure that variables processing is skipped
+        project_for_function.builds_access_level = "disabled"
+        project_for_function.save()
+
+        config = f"""
         projects_and_groups:
-          {self.project.path_with_namespace}:
-            project_settings:
-              builds_access_level: disabled
+          "{project_for_function.path_with_namespace}":
             variables:
               foo:
                 key: FOO
                 value: 123
         """
 
-        run_gitlabform(config_builds_not_enabled, project)
+        try:
+            run_gitlabform(config, project_for_function.path_with_namespace)
+        except SystemExit as e:
+            pytest.fail(f"gitlabform exited unexpectedly with code {e.code}")
 
-        with pytest.raises(GitlabListError):
-            # variables will NOT be available without builds_access_level in ['private', 'enabled']
-            vars = self.project.variables.list()
-            print("vars: ", type(vars), vars)
+        expected_log_message = f"Skipping processing variables for project '{project_for_function.path_with_namespace}' as CI/CD is disabled."
+
+        assert any(
+            expected_log_message in log for log in gitlabform_logs.debug
+        ), "Expected log message not found in gitlabform debug logs"
 
     def test__add_new_variables(self, project):
         """Test case: add new variables, including special characters and complex values"""

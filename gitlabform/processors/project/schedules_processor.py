@@ -13,6 +13,8 @@ from gitlabform.processors.abstract_processor import AbstractProcessor
 class SchedulesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("schedules", gitlab)
+        self.requires_repository = True
+        self.requires_ci_cd = True
 
     def _process_configuration(self, project_and_group: str, configuration: Dict):
         configured_schedules = configuration.get("schedules", {})

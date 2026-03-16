@@ -3,6 +3,10 @@ import pytest
 
 from tests.acceptance import run_gitlabform
 
+from tests.acceptance.conftest import (
+    GitLabFormLogs,
+)
+
 
 @pytest.fixture(scope="class")
 def schedules(project):
@@ -46,6 +50,33 @@ def schedules(project):
 
 
 class TestSchedules:
+    def test__schedules_skipped_for_cicd_disabled_project(
+        self, project_for_function, gitlabform_logs: GitLabFormLogs
+    ) -> None:
+        # Disable CI/CD for the project to ensure that schedules processing is skipped
+        project_for_function.builds_access_level = "disabled"
+        project_for_function.save()
+
+        config = f"""
+        projects_and_groups:
+          "{project_for_function.path_with_namespace}":
+            schedules:
+              "New schedule":
+                ref: main
+                cron: "0 * * * *"
+        """
+
+        try:
+            run_gitlabform(config, project_for_function.path_with_namespace)
+        except SystemExit as e:
+            pytest.fail(f"gitlabform exited unexpectedly with code {e.code}")
+
+        expected_log_message = f"Skipping processing schedules for project '{project_for_function.path_with_namespace}' as CI/CD is disabled."
+
+        assert any(
+            expected_log_message in log for log in gitlabform_logs.debug
+        ), "Expected log message not found in gitlabform debug logs"
+
     def test__add_new_schedule(self, project, schedules):
         add_schedule = f"""
         projects_and_groups:

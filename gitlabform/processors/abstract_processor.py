@@ -21,6 +21,7 @@ class AbstractProcessor(ABC):
         self.gl: PythonGitlab = GitlabWrapper(self.gitlab).get_gitlab()
 
         self.requires_repository: bool = False
+        self.requires_ci_cd: bool = False
         self.custom_diff_analyzers: dict[
             str,
             Callable[[str, list[dict[str, Union[str, int]]], list[dict[str, int]]], bool],
@@ -191,14 +192,23 @@ class AbstractProcessor(ABC):
         Individual processors can override this method to add custom checks,
         but should call `super()._can_proceed()` first.
         """
-        if not self.requires_repository:
+        # If no special requirements, proceed.
+        if not self.requires_repository and not self.requires_ci_cd:
             return True
 
         try:
             project = self.gl.get_project_by_path_cached(project_or_group)
-            if project.repository_access_level == "disabled":
+
+            # A disabled repository disables MRs and CI/CD implicitly.
+            if (self.requires_repository or self.requires_ci_cd) and project.repository_access_level == "disabled":
                 verbose(
                     f"Skipping processing {self.configuration_name} for project '{project_or_group}' as its repository is disabled."
+                )
+                return False
+
+            if self.requires_ci_cd and project.builds_access_level == "disabled":
+                verbose(
+                    f"Skipping processing {self.configuration_name} for project '{project_or_group}' as CI/CD is disabled."
                 )
                 return False
         except GitlabGetError:

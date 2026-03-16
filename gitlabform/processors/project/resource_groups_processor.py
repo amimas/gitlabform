@@ -11,6 +11,8 @@ from gitlab.v4.objects import Project, ProjectResourceGroup
 class ResourceGroupsProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("resource_groups", gitlab)
+        self.requires_repository = True
+        self.requires_ci_cd = True
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         configured_resource_groups: dict = configuration.get("resource_groups", {})

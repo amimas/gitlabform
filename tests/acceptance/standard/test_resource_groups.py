@@ -3,6 +3,9 @@ import time
 
 from tests.acceptance import run_gitlabform
 from gitlabform.constants import EXIT_PROCESSING_ERROR
+from tests.acceptance.conftest import (
+    GitLabFormLogs,
+)
 
 
 @pytest.fixture(scope="function")
@@ -33,6 +36,34 @@ def add_gitlab_ci_config(project):
 
 
 class TestResourceGroups:
+    def test__resource_groups_skipped_for_cicd_disabled_project(
+        self, project, add_gitlab_ci_config, gitlabform_logs: GitLabFormLogs
+    ) -> None:
+        # Disable CI/CD for the project to ensure that resource groups processing is skipped
+        project.builds_access_level = "disabled"
+        project.save()
+
+        config = f"""
+        projects_and_groups:
+          "{project.path_with_namespace}":
+            resource_groups:
+              production:
+                process_mode: newest_first
+        """
+
+        run_gitlabform(config, project.path_with_namespace)
+
+        expected_log_message = (
+            f"Skipping processing resource_groups for project '{project.path_with_namespace}' as CI/CD is disabled."
+        )
+        assert any(
+            expected_log_message in log for log in gitlabform_logs.debug
+        ), "Expected log message not found in gitlabform debug logs"
+
+        # Reset builds access level to avoid affecting other tests
+        project.builds_access_level = "enabled"
+        project.save()
+
     def test__update_resource_group_process_mode(self, project, add_gitlab_ci_config):
         update_resource_group_config = f"""
         projects_and_groups:
