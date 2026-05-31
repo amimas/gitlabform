@@ -29,6 +29,7 @@ jobs:
     uses: ./.github/workflows/tests-acceptance.yml
     with:
       BRANCH_REF: ${{ inputs.BRANCH_REF }}
+      environment: Integrate Pull Request
     secrets: inherit
 
   analyze:

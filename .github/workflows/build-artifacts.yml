@@ -17,10 +17,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      - name: Checkout repository
-        uses: actions/checkout@v6
-      - name: Checkout repository
-        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2

@@ -28,6 +28,7 @@ jobs:
     uses: ./.github/workflows/tests-acceptance.yml
     with:
       BRANCH_REF: ${{ github.ref }}
+      environment: Main Tests
     secrets: inherit
 
   build-and-test-artifacts:

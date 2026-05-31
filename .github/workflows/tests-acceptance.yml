@@ -6,6 +6,10 @@ on:
       BRANCH_REF:
         type: string
         required: true
+      environment:
+        description: "Environment to run licensed acceptance tests in: 'Integrate Pull Request' for PRs (requires approval) or 'Main Tests' for main/release runs."
+        type: string
+        required: true
     secrets:
       GITLAB_EE_LICENSE:
         required: false
@@ -52,7 +56,7 @@ jobs:
 
   acceptance-licensed:
     needs: [acceptance-standard]
-    environment: Main Tests
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
