@@ -19,22 +19,26 @@ on:
 jobs:
 
   build-artifacts:
+    name: Build
     uses: ./.github/workflows/build-artifacts.yml
     with:
       BRANCH_REF: ${{ github.ref }}
 
   static-analysis:
+    name: Lint
     uses: ./.github/workflows/static-analysis.yml
     with:
       BRANCH_REF: ${{ github.ref }}
 
   tests-unit:
+    name: Unit
     uses: ./.github/workflows/tests-unit.yml
     with:
       BRANCH_REF: ${{ github.ref }}
     secrets: inherit
 
   tests-acceptance:
+    name: Acceptance
     uses: ./.github/workflows/tests-acceptance.yml
     with:
       BRANCH_REF: ${{ github.ref }}

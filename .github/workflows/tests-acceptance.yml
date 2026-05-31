@@ -1,4 +1,4 @@
-name: Tests Acceptance
+name: Acceptance tests run on live GitLab instance
 
 on:
   workflow_call:
