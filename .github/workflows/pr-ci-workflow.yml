@@ -9,9 +9,9 @@ on:
 
 jobs:
 
-  build-artifacts:
+  build:
     name: Build
-    uses: ./.github/workflows/build-artifacts.yml
+    uses: ./.github/workflows/build.yml
     with:
       BRANCH_REF: ${{ inputs.BRANCH_REF }}
 
@@ -21,9 +21,9 @@ jobs:
     with:
       BRANCH_REF: ${{ inputs.BRANCH_REF }}
 
-  tests-unit:
-    name: Unit tests
-    uses: ./.github/workflows/tests-unit.yml
+  tests:
+    name: Tests
+    uses: ./.github/workflows/tests.yml
     with:
       BRANCH_REF: ${{ inputs.BRANCH_REF }}
     secrets: inherit

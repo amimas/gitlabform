@@ -19,9 +19,9 @@ jobs:
     with:
       BRANCH_REF: ${{ github.ref }}
 
-  tests-unit:
-    name: Unit tests
-    uses: ./.github/workflows/tests-unit.yml
+  tests:
+    name: Tests
+    uses: ./.github/workflows/tests.yml
     with:
       BRANCH_REF: ${{ github.ref }}
     secrets: inherit
@@ -38,9 +38,9 @@ jobs:
     name: Build & Test
     needs:
       - static-analysis
-      - tests-unit
+      - tests
       - tests-acceptance
-    uses: ./.github/workflows/build-artifacts.yml
+    uses: ./.github/workflows/build.yml
     with:
       BRANCH_REF: ${{ github.ref }}
 
@@ -55,16 +55,11 @@ jobs:
         with:
           ref: ${{ github.ref }}
           fetch-depth: 2
-      - name: Configure uv environment
-        uses: ./.github/actions/setup-uv-local
+      - name: Download built documentation
+        uses: actions/download-artifact@v4
         with:
-          python-version: "3.14"
-      - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
-        run: |
-          uv sync --frozen --no-dev --group docs
-      - name: Build documentation
-        run: |
-          uv run --no-sync docs build
+          name: docs-site
+          path: site
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.8.0
         with:
@@ -108,6 +103,8 @@ jobs:
       - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
         run: |
           uv sync --frozen --no-dev --group release
+      # TODO: In a separate PR, consume the build artifact (package-dist) uploaded
+      # in build-and-test-artifacts instead of rebuilding and verifying the package here.
       - name: Build and verify the package
         run: |
           uv run --no-sync package build
@@ -120,14 +117,13 @@ jobs:
     name: Publish GHCR
     needs:
       - build-and-test-artifacts
+      - publish-to-pypi
     runs-on: ubuntu-latest
     steps:
+      # TODO: In a separate PR, optimize docker image build to consume the built package artifact
+      # (package-dist) instead of copying and rebuilding from source if applicable.
       - name: Checkout repository
         uses: actions/checkout@v6
-      - name: Configure uv environment
-        uses: ./.github/actions/setup-uv-local
-        with:
-          python-version: "3.14"
       - name: Get the version from the tag
         run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
       - name: Docker metadata
