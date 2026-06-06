@@ -1,4 +1,4 @@
-name: Linter and tests (PRs)
+name: "PR: Lint & Tests"
 
 on:
   workflow_call:
