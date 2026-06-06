@@ -1,4 +1,4 @@
-name: "PR: Lint & Tests"
+name: "Lint & Tests"
 
 on:
   workflow_call:
