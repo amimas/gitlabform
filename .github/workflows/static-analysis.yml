@@ -16,6 +16,7 @@ permissions:
 # once heavier security tooling is needed.
 jobs:
   lockfile-verify:
+    name: Lockfile
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -28,6 +29,7 @@ jobs:
         run: uv lock --check
 
   linting:
+    name: "${{ matrix.check == 'black' && 'Black' || matrix.check == 'mypy' && 'Mypy' || 'Bandit' }}"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

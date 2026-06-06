@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   unit:
-    name: Unit tests
+    name: "Unit (${{ matrix.python-version }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

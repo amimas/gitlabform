@@ -27,7 +27,7 @@ jobs:
     secrets: inherit
 
   tests-acceptance:
-    name: Acceptance tests
+    name: Acceptance Tests
     uses: ./.github/workflows/tests-acceptance.yml
     with:
       BRANCH_REF: ${{ github.ref }}
