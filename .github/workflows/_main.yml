@@ -1,7 +1,6 @@
 name: Main branch
 
 permissions:
-  actions: write
   checks: read
   contents: read
   discussions: write
@@ -44,58 +43,3 @@ jobs:
       BRANCH_REF: ${{ github.ref }}
       environment: Main Tests
     secrets: inherit
-
-  dispatch-release:
-    name: Dispatch Release Workflow
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - static-analysis
-      - tests
-      - tests-acceptance
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Find release tag for commit
-        id: find_tag
-        run: |
-          set -euo pipefail
-          echo "Looking for v* tags on commit ${GITHUB_SHA}"
-          git fetch --prune --tags || true
-          TAGS=$(git tag --points-at "$GITHUB_SHA" || true)
-          if [ -z "$TAGS" ]; then
-            echo "No tags found on this commit." >&2
-            echo "tag=" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          echo "Tags on commit:" >&2
-          printf '%s\n' "$TAGS" >&2
-          TAG=$(printf '%s\n' "$TAGS" | grep -E '^v[0-9]' | head -n1 || true)
-          if [ -z "$TAG" ]; then
-            echo "No v* release tag found on this commit; skipping release dispatch." >&2
-            echo "tag=" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          echo "Selected release tag: $TAG" >&2
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-
-      - name: Dispatch release workflow
-        if: steps.find_tag.outputs.tag != ''
-        uses: actions/github-script@v7
-        env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-        with:
-          script: |
-            const tag = '${{ steps.find_tag.outputs.tag }}';
-            console.log(`Dispatching release workflow for tag ${tag}`);
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: '.github/workflows/_releases.yml',
-              ref: `refs/tags/${tag}`,
-              inputs: { tag },
-            });
-            console.log('Release workflow dispatch request sent.');
