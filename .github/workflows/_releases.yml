@@ -1,10 +1,21 @@
 name: Releases
 
 on:
+  # Trigger A: Automatic execution when Main Workflow finishes
+  workflow_run:
+    workflows: ["Main Workflow"]
+    types:
+      - completed
+  
+  # Trigger B: Manual execution fallback from the GitHub UI
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'Release tag to publish (must start with v, e.g. v1.2.3)'
+      manual_tag:
+        description: 'Tag to release (e.g., v1.2.3)'
+        required: true
+        type: string
+      override_run_id:
+        description: 'Main Workflow Run ID (Required if downloading artifacts)'
         required: true
         type: string
 
@@ -13,61 +24,64 @@ permissions:
   packages: write
 
 jobs:
-  verify-release-tag:
-    name: Verify release tag
+  prep-release:
+    name: Prepare release
     runs-on: ubuntu-latest
     outputs:
-      release_tag: ${{ steps.set_release.outputs.release_tag }}
-      release_ref: ${{ steps.set_release.outputs.release_ref }}
+      is_valid_release: ${{ steps.validate.outputs.is_valid }}
+      semver_tag: ${{ steps.validate.outputs.version }}
+      target_run_id: ${{ steps.validate.outputs.run_id }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
         with:
-          fetch-depth: 0
+          python-version: "3.14"
 
-      - name: Validate release tag exists
-        id: set_release
-        run: |
-          set -euo pipefail
+      - name: Validate release conditions
+        id: validate
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+          TAG: ${{ inputs.manual_tag }}
+          MANUAL_ID: ${{ inputs.override_run_id }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          AUTO_ID: ${{ github.event.workflow_run.id }}
+        run: uv run --script dev/gh_workflow_release_validation.py
 
-          TAG="${{ github.event.inputs.tag }}"
-          git fetch --prune --tags
-
-          if [[ ! "$TAG" =~ ^v[0-9] ]]; then
-            echo "Tag '${TAG}' is not a valid release tag. Must start with 'v' followed by a digit." >&2
-            exit 1
-          fi
-
-          if ! git rev-parse --verify "refs/tags/${TAG}" >/dev/null 2>&1; then
-            echo "Tag '${TAG}' not found" >&2
-            exit 1
-          fi
-
-          echo "release_tag=${TAG}" >> $GITHUB_OUTPUT
-          echo "release_ref=refs/tags/${TAG}" >> $GITHUB_OUTPUT
-
+  # TODO: Remove this job when all the release jobs have been migrated
+  # to consume build artifacts from Main workflow instead of rebuilding.
   build-release-artifacts:
     name: Build release artifacts
+    if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
     needs:
-      - verify-release-tag
+      - prep-release
     uses: ./.github/workflows/build.yml
     with:
-      BRANCH_REF: ${{ needs.verify-release-tag.outputs.release_ref }}
+      BRANCH_REF: ${{ needs.prep-release.outputs.semver_tag }}
 
   publish-docs:
     name: Docs
+    if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
     needs:
+      - prep-release
       - build-release-artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          ref: ${{ needs.verify-release-tag.outputs.release_ref }}
+          ref: ${{ needs.prep-release.outputs.semver_tag }}
           fetch-depth: 2
       - name: Download built documentation
         uses: actions/download-artifact@v4
         with:
+          run-id: ${{ needs.prep-release.outputs.target_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           name: docs-site
           path: site
       - name: Deploy 🚀
@@ -78,20 +92,24 @@ jobs:
 
   publish-to-github:
     name: Publish Release
+    if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
     needs:
-      - build-release-artifacts
+      - prep-release
     runs-on: ubuntu-latest
     steps:
       - name: Create release in GitHub
         uses: ncipollo/release-action@v1
         with:
-          name: ${{ needs.verify-release-tag.outputs.release_tag }}
+          tag: ${{ needs.prep-release.outputs.semver_tag }}
+          name: ${{ needs.prep-release.outputs.semver_tag }}
           body: "(this is a placeholder, it will be replaced with a changelog contents)"
           token: ${{ secrets.GITHUB_TOKEN }}
 
   publish-to-pypi:
     name: Publish PyPI
+    if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
     needs:
+      - prep-release
       - build-release-artifacts
     runs-on: ubuntu-latest
     environment:
@@ -103,7 +121,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          ref: ${{ needs.verify-release-tag.outputs.release_ref }}
+          ref: ${{ needs.prep-release.outputs.semver_tag }}
           fetch-depth: 2
       - name: Configure uv environment
         uses: ./.github/actions/setup-uv-local
@@ -124,7 +142,9 @@ jobs:
 
   publish-to-ghcr:
     name: Publish GHCR
+    if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
     needs:
+      - prep-release
       - build-release-artifacts
       - publish-to-pypi
     runs-on: ubuntu-latest
@@ -134,7 +154,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          ref: ${{ needs.verify-release-tag.outputs.release_ref }}
+          ref: ${{ needs.prep-release.outputs.semver_tag }}
       - name: Get the version from the tag
         run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
       - name: Docker metadata
