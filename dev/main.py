@@ -24,6 +24,7 @@ from dev.docker import (
 from dev.release import (
     publish_pypi as run_publish_logic,
     publish_docker as run_docker_push_logic,
+    gh_workflow_check as run_gh_workflow_check_logic,
 )
 
 # --- Constant Descriptions for Unification ---
@@ -145,6 +146,12 @@ def _dispatch_docker(args):
 
 def _add_release_subcommands(subparsers):
     """Configures artifact distribution commands."""
+    subparsers.add_parser(
+        "gh-workflow-check",
+        help="Verify GitHub Workflow conditions before releasing",
+        description="Perform pre-flight validation for GitHub Actions. This command resolves version tags from git history and verifies the integrity of the triggering workflow run.",
+    )
+
     pypi = subparsers.add_parser(
         "pypi",
         help="Publish the Python package to PyPI",
@@ -164,7 +171,9 @@ def _add_release_subcommands(subparsers):
 
 def _dispatch_release(args):
     """Executes release logic."""
-    if args.command == "pypi":
+    if args.command == "gh-workflow-check":
+        run_gh_workflow_check_logic(args.extra_args if hasattr(args, "extra_args") else None)
+    elif args.command == "pypi":
         run_publish_logic(args.extra_args)
     elif args.command == "docker":
         # Reconstruct arguments to maintain compatibility with the backend parser

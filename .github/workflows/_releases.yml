@@ -51,7 +51,7 @@ jobs:
           CONCLUSION: ${{ github.event.workflow_run.conclusion }}
           SHA: ${{ github.event.workflow_run.head_sha }}
           AUTO_ID: ${{ github.event.workflow_run.id }}
-        run: uv run --script dev/gh_workflow_release_validation.py
+        run: uv run release gh-workflow-check
 
   # TODO: Remove this job when all the release jobs have been migrated
   # to consume build artifacts from Main workflow instead of rebuilding.
@@ -69,7 +69,6 @@ jobs:
     if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
     needs:
       - prep-release
-      - build-release-artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
