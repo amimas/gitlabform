@@ -4,6 +4,7 @@ import argparse
 import os
 import re
 import sys
+from typing import NoReturn
 import requests
 from dev.common import logger, run_command, get_executable
 
@@ -24,7 +25,7 @@ def _append_github_output(key: str, value: str):
         logger.debug(f"[Local Simulation] GITHUB_OUTPUT: {key}={value}")
 
 
-def _conclude_validation(is_valid: bool, message: str, severity: str = "notice"):
+def _conclude_validation(is_valid: bool, message: str, severity: str = "notice") -> NoReturn:
     """
     Finalizes the validation process and signals the GitHub runner.
 
@@ -171,12 +172,14 @@ def gh_workflow_check(extra_args: list[str] | None = None):
         _append_github_output("version", manual_tag)
         _append_github_output("run_id", manual_run_id)
         _conclude_validation(True, f"Manual validation passed for {manual_tag}.")
-        return
 
     # Case 2: Automated Trigger (Trusted Input)
     # GitHub provides the Run ID and SHA automatically. We verify that a SemVer
     # tag (v*) exists on that SHA to justify proceeding with a release.
     if event_name == "workflow_run":
+        if not commit_sha or not automated_run_id:
+            _conclude_validation(False, "Missing SHA or AUTO_ID env vars for automated release.", severity="error")
+
         if upstream_conclusion != "success":
             # We exit 0 here because the trigger might be valid but the upstream failed;
             # we just skip the release without failing the check job itself.
