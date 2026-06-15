@@ -138,7 +138,7 @@ jobs:
           uv run --no-sync package verify
       - name: Publish to PyPI
         run: |
-          uv run --no-sync package publish
+          uv run --no-sync release pypi
 
   publish-to-ghcr:
     name: Publish GHCR
