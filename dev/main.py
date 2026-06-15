@@ -16,8 +16,10 @@ from dev.qa import format_code, lint as run_qa_logic, test as run_test_logic
 from dev.package import (
     python_build as run_build_logic,
     python_verify as run_verify_logic,
-    docker_build as run_docker_build_logic,
-    docker_verify as run_docker_verify_logic,
+)
+from dev.docker import (
+    build as run_docker_build_logic,
+    verify as run_docker_verify_logic,
 )
 from dev.release import (
     publish_pypi as run_publish_logic,

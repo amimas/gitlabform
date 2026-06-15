@@ -1,13 +1,11 @@
-"""Tasks related to building and verifying all application artifacts (Python & Docker)."""
+"""Tasks related to building and verifying Python distribution artifacts."""
 
-import argparse
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
 from dev.common import REPO_ROOT, logger, run_command, get_executable
-from dev.release import publish_docker
 
 
 def python_build(extra_args: list[str] | None = None):
@@ -31,7 +29,7 @@ def python_verify(extra_args: list[str] | None = None):
     # 1. Ensure build artifacts exist
     if not dist_path.exists() or not any(dist_path.iterdir()):
         logger.error(f"[bold red]❌ Build directory '{dist_path}/' is missing or empty.[/bold red]")
-        logger.info("Hint: Run 'uv run build' first.")
+        logger.info("Hint: Run [bold cyan]uv run package build[/bold cyan] first.")
         sys.exit(1)
 
     wheels = [str(p) for p in dist_path.glob("*.whl")]
@@ -66,40 +64,3 @@ def python_verify(extra_args: list[str] | None = None):
         subprocess.run([gitlabform_exe, "--version"], check=True)
 
     logger.info("[bold green]✅ Verification complete. Artifacts are ready for release.[/bold green]")
-
-
-def docker_build(extra_args: list[str] | None = None):
-    """Builds the GitLabForm Docker image.
-
-    Args:
-        extra_args: Arguments for the docker build command (e.g., --image, --tag, --push).
-    """
-    parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument("--image", default="localhost/gitlabform")
-    parser.add_argument("--tag", default="latest")
-    parser.add_argument("--push", action="store_true", help="Automatically push after build")
-
-    parsed, remaining = parser.parse_known_args(extra_args or [])
-    image_name = f"{parsed.image}:{parsed.tag}"
-
-    docker_bin = get_executable("docker")
-    build_cmd = [docker_bin, "build", "--pull", "-t", image_name] + remaining + [str(REPO_ROOT)]
-
-    run_command(build_cmd, f"Building Docker image: [bold cyan]{image_name}[/bold cyan]")
-
-    if parsed.push:
-        publish_docker([f"--image={parsed.image}", f"--tag={parsed.tag}"])
-
-
-def docker_verify(extra_args: list[str] | None = None):
-    """Verifies the built Docker image with a smoke test."""
-    parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument("--image", default="localhost/gitlabform")
-    parser.add_argument("--tag", default="latest")
-
-    parsed, remaining = parser.parse_known_args(extra_args or [])
-    image_name = f"{parsed.image}:{parsed.tag}"
-
-    docker_bin = get_executable("docker")
-    cmd = [docker_bin, "run", "--rm"] + remaining + [image_name, "gitlabform", "--version"]
-    run_command(cmd, f"Verifying Docker image: [bold cyan]{image_name}[/bold cyan]")
