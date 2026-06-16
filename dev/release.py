@@ -34,29 +34,29 @@ def _conclude_validation(is_valid: bool, message: str, severity: str = "notice")
     - Uses workflow commands (::error:: or ::notice::) to highlight status in the UI.
     - Exits with 1 on error to stop the workflow, or 0 to continue (even if skipping).
     """
-    icon = "✅" if is_valid else ("❌" if severity == "error" else "⏭️")
-    color = "green" if is_valid else ("red" if severity == "error" else "yellow")
-
-    log_msg = f"{icon} [bold {color}]{severity.upper()}:[/bold {color}] {message}"
-    if severity == "error":
-        logger.error(log_msg)
+    if is_valid:
+        status, icon, color, gh_severity = "VALID", "✅", "green", "notice"
+    elif severity == "error":
+        status, icon, color, gh_severity = "FAILED", "❌", "red", "error"
     else:
-        logger.info(log_msg)
+        # We use 'warning' for skips because it shows up more prominently on the
+        # GitHub Summary page (yellow triangle) than a neutral 'notice'.
+        status, icon, color, gh_severity = "SKIPPED", "⏭️", "yellow", "warning"
 
-    # GitHub Workflow Command for UI highlights
-    print(f"::{severity}::{message}")
+    # 1. Terminal Narrative
+    logger.info("─" * 80)
+    logger.info(f"{icon} [bold {color}]RELEASE {status}:[/bold {color}] {message}")
+    logger.info("─" * 80)
 
-    # Write to Job Summary
+    # 2. GitHub UI Highlights (Annotations)
+    print(f"::{gh_severity} title=Release Check::{message}")
+
+    # 3. GitHub Job Summary (Markdown)
     summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary_file:
         with open(summary_file, "a", encoding="utf-8") as f:
-            if is_valid:
-                status = "VALID"
-            elif severity == "error":
-                status = "FAILED"
-            else:
-                status = "SKIPPED"
-            f.write(f"### Release Validation: {status}\n{message}\n")
+            f.write(f"## {icon} Release Eligibility: {status}\n\n")
+            f.write(f"> {message}\n")
 
     _append_github_output("is_valid", "true" if is_valid else "false")
     sys.exit(1 if severity == "error" else 0)
@@ -114,7 +114,7 @@ def _find_tag_for_sha(commit_sha: str, headers: dict, base_url: str) -> str:
     logger.info(f"Scanning repository tags for a version matching SHA [bold cyan]{commit_sha[:8]}[/bold cyan]...")
     page = 1
     while True:
-        logger.info(f"Fetching repository tags (page {page})...")
+        logger.info(f"Retrieving repository tags (page {page})...")
         tags_url = f"{base_url}/tags?per_page=100&page={page}"
         response = requests.get(tags_url, headers=headers, timeout=15)
         response.raise_for_status()
@@ -224,13 +224,13 @@ def gh_workflow_check(extra_args: list[str] | None = None):
         if upstream_conclusion != "success":
             # We exit 0 here because the trigger might be valid but the upstream failed;
             # we just skip the release without failing the check job itself.
-            _conclude_validation(False, f"Upstream build status was '{upstream_conclusion}'.", severity="notice")
+            _conclude_validation(False, f"Upstream build status was '{upstream_conclusion}'.", severity="warning")
         try:
             # Automated releases only happen if the commit has a 'v*' tag.
             # This prevents every successful main build from triggering a release.
             tag_name = _find_tag_for_sha(commit_sha, headers, base_url)
             if not tag_name:
-                _conclude_validation(False, f"No v-tag for SHA {commit_sha[:8]}.", severity="notice")
+                _conclude_validation(False, f"No version tag (v*) found for SHA {commit_sha[:8]}.", severity="warning")
 
             _append_github_output("version", tag_name)
             _append_github_output("run_id", automated_run_id)
