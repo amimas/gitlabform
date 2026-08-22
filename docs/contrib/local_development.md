@@ -224,7 +224,7 @@ This requirement is intentional: the `Dockerfile` installs the packaged wheel, i
 You can customize the image name and tag via arguments:
 
 ```bash
-uv run docker build --image my-registry/gitlabform --tag dev
+uv run docker build --tag my-registry/gitlabform:dev
 ```
 
 To see all Docker build options:
