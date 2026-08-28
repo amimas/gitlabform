@@ -209,16 +209,22 @@ uv run package verify
 
 ### Docker Images
 
-The Docker image is the recommended way to run GitLabForm in CI/CD environments. To build the image locally using our multi-stage `Dockerfile`:
+The Docker image is the recommended way to run GitLabForm in CI/CD environments.
+
+Before building a container image, make sure the Python wheel exists in `dist/`:
 
 ```bash
+uv run package build
 uv run docker build
 ```
+
+This requirement is intentional: the `Dockerfile` installs the packaged wheel, instead of rebuilding from the source code again. The `uv run docker build` command is the same local and CI entry point, but the GitHub Actions workflow passes explicit `--platform` values for multi-arch validation while local development typically targets the host architecture only.
+
 
 You can customize the image name and tag via arguments:
 
 ```bash
-uv run docker build --image my-registry/gitlabform --tag dev
+uv run docker build --tag my-registry/gitlabform:dev
 ```
 
 To see all Docker build options:

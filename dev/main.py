@@ -115,14 +115,16 @@ def _dispatch_package(args):
 def _add_docker_subcommands(subparsers):
     """Configures Docker image management commands."""
     b = subparsers.add_parser("build", help="Build the production Docker image", description=DESC_DOCKER)
-    b.add_argument("--image", default="localhost/gitlabform", help="Image name (default: localhost/gitlabform)")
-    b.add_argument("--tag", default="latest", help="Image tag (default: latest)")
+    b.add_argument("--tag", default="localhost/gitlabform:latest", help="Image tag (default: latest)")
     b.add_argument("--push", action="store_true", help="Push the image to the registry")
+    b.add_argument(
+        "--output", help="Write the built image to an archive file (for example: type=docker,dest=/tmp/image.tar)"
+    )
     b.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for docker build")
 
     v = subparsers.add_parser("verify", help="Validate the image with a smoke test", description=DESC_DOCKER)
-    v.add_argument("--image", default="localhost/gitlabform", help="Image name (default: localhost/gitlabform)")
-    v.add_argument("--tag", default="latest", help="Image tag (default: latest)")
+    v.add_argument("--tag", default="localhost/gitlabform:latest", help="Image tag (default: latest)")
+    v.add_argument("--input", help="Load a Docker image archive from disk before verifying it")
     v.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for docker run")
 
 
@@ -130,9 +132,13 @@ def _dispatch_docker(args):
     """Executes Docker logic."""
     # Reconstruct arguments to maintain compatibility with the backend parser
     # and ensure that help/defaults defined in the CLI are respected.
-    extra_args = ["--image", args.image, "--tag", args.tag]
+    extra_args = ["--tag", args.tag]
     if args.command == "build" and args.push:
         extra_args.append("--push")
+    if args.command == "build" and getattr(args, "output", None):
+        extra_args.extend(["--output", args.output])
+    if args.command == "verify" and getattr(args, "input", None):
+        extra_args.extend(["--input", args.input])
 
     # Append any remaining raw arguments passed via REMAINDER
     if args.extra_args:
@@ -164,8 +170,7 @@ def _add_release_subcommands(subparsers):
         help="Push the Docker image to a registry",
         description="Push the built Docker image to the configured registry (e.g., GHCR).",
     )
-    docker_p.add_argument("--image", default="localhost/gitlabform", help="Image name (default: localhost/gitlabform)")
-    docker_p.add_argument("--tag", default="latest", help="Image tag (default: latest)")
+    docker_p.add_argument("--tag", default="localhost/gitlabform:latest", help="Image tag (default: latest)")
     docker_p.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for docker push")
 
 
@@ -177,7 +182,7 @@ def _dispatch_release(args):
         run_publish_logic(args.extra_args)
     elif args.command == "docker":
         # Reconstruct arguments to maintain compatibility with the backend parser
-        extra_args = ["--image", args.image, "--tag", args.tag]
+        extra_args = ["--tag", args.tag]
         if args.extra_args:
             extra_args.extend(args.extra_args)
         run_docker_push_logic(extra_args=extra_args)
