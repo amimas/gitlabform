@@ -54,15 +54,15 @@ dev = [
     { include-group = "docs" },
     { include-group = "release" },
     "commitizen==4.18.0",
-    "prek==0.4.14",
+    "prek==0.5.2",
 ]
 # Minimum set of dependencies required to execute the test suite.
 test = [
-    "coverage==7.15.4",
-    "cryptography==50.0.0",
+    "coverage==7.16.0",
+    "cryptography==50.0.1",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
-    "pytest-rerunfailures==16.6",
+    "pytest-rerunfailures==16.6.1",
     "xkcdpass==1.30.0",
 ]
 # Static analysis and formatting tools.
@@ -72,15 +72,15 @@ lint = [
     "codespell==2.4.3",
     "mypy==2.3.1",
     "mypy-extensions==1.1.0",
-    "ruff==0.16.3",
+    "ruff==0.16.5",
     "types-requests==2.33.0.20260712",
 ]
 # Documentation generation stack.
 docs = [
     "markdown==3.10.3",
-    "zensical==0.0.56",
+    "zensical==0.0.58",
     "pygments==2.21.0",
-    "pymdown-extensions==11.0.1",
+    "pymdown-extensions==11.0.2",
 ]
 # Tools required for building and verifying releases.
 release = [
@@ -103,23 +103,9 @@ content-type = "text/markdown"
 # Primary application entrypoint
 gitlabform = "gitlabform.run:run"
 
-# Development toolkit and environment management
-dev = "dev.main:main"
-workspace = "dev.main:workspace"
-
-# Development workflow (Linting, Formatting, and Testing)
-qa = "dev.main:qa"
-
-# Local infrastructure management
-gitlab-local = "dev.main:gitlab_local"
-
-# Documentation workflow
-docs = "dev.main:docs"
-
-# Packaging and distribution verification
-package = "dev.main:package"
-docker = "dev.main:docker"
-release = "dev.main:release"
+# GitlabForm development toolkit: only works when invoked from inside the
+# gitlabform repository itself.
+glf-dev = "dev.main:main"
 
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::DeprecationWarning"]
