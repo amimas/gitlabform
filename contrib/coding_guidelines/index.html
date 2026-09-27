@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="zensical-0.0.56">
+      <meta name="generator" content="zensical-0.0.58">
     
     
       
@@ -30,12 +30,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/classic/main.39e53929.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/classic/main.38807bfb.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/classic/palette.7dc9a0ad.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/classic/palette.c7ab7c71.min.css">
       
       
 
@@ -1466,6 +1466,15 @@
 <li>for all bug fixes and new features using GitLab API please add acceptance tests</li>
 </ul>
 </li>
+<li>use INFO as the base log level, DEBUG only if you might expose sensitive information (such as raw API request/responses)<ul>
+<li><a href="https://docs.python.org/3/howto/logging.html#logging-levels">Logging levels information</a></li>
+<li>by default we log WARNING and above issues; INFO is logged when specifying the <code>--verbose</code> argument in CLI</li>
+<li>diff output is emitted via a dedicated <code>DIFF</code> log level and does not require <code>--verbose</code></li>
+<li>use the <code>logging</code> module for logging, do not use <code>print</code> statements</li>
+<li>we have a custom log level for "diff" messages, used only in the <code>difference_logger</code></li>
+<li>we have a custom log level "notice" used only in <code>gitlabform.__init__</code> in order to output version information and the total numbers of Projects/Groups processed</li>
+</ul>
+</li>
 <li>add or update the docs for new features,</li>
 <li>use <a href="https://pre-commit.com">pre-commit</a> to automatically reformat your code and run linters before committing,</li>
 <li>squash your commits (unless there is a reason not to),</li>
@@ -1526,7 +1535,7 @@
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.indexes"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.6970bfe9.min.js"></script>
       
     
   </body>

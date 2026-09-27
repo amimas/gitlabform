@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="zensical-0.0.56">
+      <meta name="generator" content="zensical-0.0.58">
     
     
       
@@ -30,12 +30,12 @@
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/classic/main.39e53929.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/classic/main.38807bfb.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../../assets/stylesheets/classic/palette.7dc9a0ad.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/classic/palette.c7ab7c71.min.css">
       
       
 
@@ -1357,10 +1357,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#command-shortcuts" class="md-nav__link">
+  <a href="#command-style" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Command Shortcuts
+        Command style
       </span>
     </span>
   </a>
@@ -1697,10 +1697,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#command-shortcuts" class="md-nav__link">
+  <a href="#command-style" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Command Shortcuts
+        Command style
       </span>
     </span>
   </a>
@@ -1881,7 +1881,7 @@
 
 
 <h1 id="local-development">Local Development<a class="headerlink" href="#local-development" title="Permanent link">&para;</a></h1>
-<p>Welcome to the GitLabForm development guide. We use <strong><code>uv</code></strong> and a unified development toolkit to manage our lifecycle, ensuring a fast, deterministic, and reproducible environment for all contributors.</p>
+<p>Welcome to the GitLabForm development guide. We use <strong><code>uv</code></strong> and a repo-scoped development toolkit to manage the project lifecycle in a fast, deterministic, and reproducible way.</p>
 <h2 id="required-tools">Required tools<a class="headerlink" href="#required-tools" title="Permanent link">&para;</a></h2>
 <p>Following tools are used in this project. Please make sure you have them installed:</p>
 <ul>
@@ -1891,42 +1891,38 @@
 </ul>
 <h2 id="typical-development-workflow">Typical development workflow<a class="headerlink" href="#typical-development-workflow" title="Permanent link">&para;</a></h2>
 <p>The project provides a comprehensive CLI (<strong>the development toolkit</strong>) organized into task domains. You can discover the available domains by running the main entry point:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>dev<span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>--help
 </code></pre></div>
-<h3 id="command-shortcuts">Command Shortcuts<a class="headerlink" href="#command-shortcuts" title="Permanent link">&para;</a></h3>
-<p>While <code>dev</code> is the central entry point, each domain is also registered as a direct shortcut in your environment. You can omit the <code>dev</code> prefix from any command for a more concise experience. For example, these two commands are identical:</p>
+<h3 id="command-style">Command style<a class="headerlink" href="#command-style" title="Permanent link">&para;</a></h3>
+<p>Use <code>glf-dev</code> for all developer commands, for example:</p>
 <ul>
-<li>Full: <code>uv run dev workspace setup</code></li>
-<li>Shortcut: <code>uv run workspace setup</code></li>
+<li><code>uv run glf-dev workspace setup</code></li>
+<li><code>uv run glf-dev qa lint</code></li>
+<li><code>uv run glf-dev docker build --help</code></li>
 </ul>
-<p>Each domain (like qa, docs, or workspace) provides its own help context. If you are ever unsure of the available sub-commands or arguments, simply run the domain name or add the <code>--help</code> flag:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>workspace<span class="w">            </span><span class="c1"># Shows help for workspace setup and cleanup</span>
-uv<span class="w"> </span>run<span class="w"> </span>workspace<span class="w"> </span>--help<span class="w">     </span><span class="c1"># Same as above</span>
-uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </span>build<span class="w"> </span>--help<span class="w">  </span><span class="c1"># Shows help and available flags for Docker builds</span>
-</code></pre></div>
 <p>A standard lifecycle for implementing a new feature or bug fix typically involves:</p>
 <ol>
 <li><strong>New branch</strong>: Create a new branch for your changes.</li>
-<li><strong>Setup</strong>: Initialize or update your local workspace using uv run workspace setup. This also installs the Git hooks. See Workspace Management section for more details. See <a href="#workspace-management">Workspace management</a> section for more details.</li>
+<li><strong>Setup</strong>: Initialize or update your local workspace using <code>uv run glf-dev workspace setup</code>. This also installs the Git hooks. See <a href="#workspace-management">Workspace management</a> for more details.</li>
 <li><strong>Develop</strong>: Implement your logic or fix in the codebase.</li>
-<li><strong>Quality</strong>: Format and lint your code via the qa domain. See <a href="#code-quality">Code quality</a> section for more details.</li>
-<li><strong>Test</strong>: Be sure to include/update tests for your changes. See <a href="#testing">Testing</a> section for more details.</li>
-<li><strong>Validate</strong>: Perform a final check on the build artifacts. See <a href="#building-verification">Building &amp; Verification</a> section for more details.</li>
+<li><strong>Quality</strong>: Format and lint your code via the <code>qa</code> domain. See <a href="#code-quality">Code quality</a> for more details.</li>
+<li><strong>Test</strong>: Be sure to include/update tests for your changes. See <a href="#testing">Testing</a> for more details.</li>
+<li><strong>Validate</strong>: Perform a final check on the build artifacts. See <a href="#building-verification">Building &amp; Verification</a> for more details.</li>
 <li>
 <p><strong>Commit</strong>: Record your changes using the <strong>Conventional Commits</strong> standard. The Git hooks installed during setup will automatically validate your commit messages.</p>
 <div class="admonition tip">
 <p class="admonition-title">Guided experience via Commitizen</p>
-<p>You can use <code>uv run cz commit</code> that will present an interactive option in the terminal for selecting and commiting your changes.</p>
+<p>You can use <code>uv run cz commit</code> that will present an interactive option in the terminal for selecting and committing your changes.</p>
 </div>
 </li>
 <li>
-<p><strong>Documentation</strong>: Add/update documentation if necessary for the change being introduced. See <a href="#documentation">Documentation</a> section for more details.</p>
+<p><strong>Documentation</strong>: Add/update documentation if necessary for the change being introduced. See <a href="#documentation">Documentation</a> for more details.</p>
 </li>
 <li><strong>Open/Update PR</strong>: Push your changes to GitHub and create/update a pull request.</li>
 </ol>
 <h2 id="workspace-management">Workspace Management<a class="headerlink" href="#workspace-management" title="Permanent link">&para;</a></h2>
-<p>Managing your development environment is handled by the workspace domain. We use <code>uv</code> to provide a consistent, isolated, and reproducible environment where everything is contained within an automatically managed <code>.venv</code>.</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>workspace<span class="w"> </span>setup
+<p>Managing your development environment is handled by the <code>workspace</code> domain. We use <code>uv</code> to provide a consistent, isolated, and reproducible environment where everything is contained within an automatically managed <code>.venv</code>.</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>workspace<span class="w"> </span>setup
 </code></pre></div>
 <p>This command performs several automated tasks:</p>
 <ol>
@@ -1936,40 +1932,40 @@ uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </sp
 <li><strong>Git Hook Installation</strong>: Configures Git hooks to enforce linting, formatting, and Conventional Commit standards.</li>
 </ol>
 <p>To reset your workspace and remove all build artifacts, caches, and the virtual environment:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>workspace<span class="w"> </span>clean
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>workspace<span class="w"> </span>clean
 </code></pre></div>
 <h2 id="code-quality">Code Quality<a class="headerlink" href="#code-quality" title="Permanent link">&para;</a></h2>
 <p>Maintaining high code quality is essential for the stability and readability of the project. We use a suite of tools for automatic formatting and static analysis.</p>
 <h3 id="formatting">Formatting<a class="headerlink" href="#formatting" title="Permanent link">&para;</a></h3>
 <p>We use <strong>black</strong> to enforce a consistent code style across the entire repository. This ensures that the codebase remains readable and reduces friction during code reviews.</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>qa<span class="w"> </span>format
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>qa<span class="w"> </span>format
 </code></pre></div>
 <h3 id="linting">Linting<a class="headerlink" href="#linting" title="Permanent link">&para;</a></h3>
 <p>We use several tools (including <code>mypy</code> for type checking and <code>bandit</code> for security auditing) to catch potential issues before they are committed. By default, the <code>lint</code> command runs all configured checks in parallel.</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>qa<span class="w"> </span>lint
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>qa<span class="w"> </span>lint
 </code></pre></div>
 <p>You can also run a specific tool or pass additional arguments directly to the underlying linter. For example, to run only mypy with specific flags:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>qa<span class="w"> </span>lint<span class="w"> </span>mypy<span class="w"> </span>.
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>qa<span class="w"> </span>lint<span class="w"> </span>mypy<span class="w"> </span>.
 </code></pre></div>
 <p>To see the list of available linting tools and help:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>qa<span class="w"> </span>lint<span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>qa<span class="w"> </span>lint<span class="w"> </span>--help
 </code></pre></div>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
 <p>We use <strong>pytest</strong> as the underlying engine for our entire test suite. The toolkit's <code>test</code> command acts as a passthrough, meaning any valid <code>pytest</code> argument or flag can be provided directly.</p>
 <p>To discover all available testing options for the <code>qa</code> domain:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>qa<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>qa<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--help
 </code></pre></div>
 <p><strong>Common examples:</strong></p>
 <ul>
-<li>Run tests matching a keyword: <code>uv run qa test -k "archive"</code></li>
-<li>Run tests with verbose output: <code>uv run qa test -v</code></li>
-<li>Run with coverage reporting: <code>uv run qa test --cov=.</code></li>
-<li>Run a specific test file/suite: <code>uv run qa test tests/&lt;path-to-test-file&gt;</code></li>
-<li>Run a specific test within a test file/suite: <code>uv run qa test tests/&lt;path-to-test-file&gt;::&lt;test-class&gt;::&lt;test-method&gt;</code></li>
+<li>Run tests matching a keyword: <code>uv run glf-dev qa test -k "archive"</code></li>
+<li>Run tests with verbose output: <code>uv run glf-dev qa test -v</code></li>
+<li>Run with coverage reporting: <code>uv run glf-dev qa test --cov=.</code></li>
+<li>Run a specific test file/suite: <code>uv run glf-dev qa test tests/&lt;path-to-test-file&gt;</code></li>
+<li>Run a specific test within a test file/suite: <code>uv run glf-dev qa test tests/&lt;path-to-test-file&gt;::&lt;test-class&gt;::&lt;test-method&gt;</code></li>
 </ul>
 <h3 id="unit-tests">Unit Tests<a class="headerlink" href="#unit-tests" title="Permanent link">&para;</a></h3>
 <p>Unit tests are fast, isolated, and do not require a running GitLab instance. They are ideal for validating logic and configuration parsing:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>qa<span class="w"> </span><span class="nb">test</span><span class="w"> </span>tests/unit
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>qa<span class="w"> </span><span class="nb">test</span><span class="w"> </span>tests/unit
 </code></pre></div>
 <h3 id="acceptance-tests">Acceptance Tests<a class="headerlink" href="#acceptance-tests" title="Permanent link">&para;</a></h3>
 <p>Acceptance tests perform real operations against a running GitLab instance. Because they interact with an actual API, they are slower and require more setup than unit tests.</p>
@@ -1977,19 +1973,19 @@ uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </sp
 <li>
 <p>Start Local GitLab</p>
 <p>We recommend running tests against a disposable GitLab instance in Docker to ensure your environment matches our CI/CD pipelines:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>gitlab-local<span class="w"> </span>up<span class="w"> </span><span class="c1"># Starts Enterprise Edition (EE) by default</span>
-uv<span class="w"> </span>run<span class="w"> </span>gitlab-local<span class="w"> </span>down<span class="w"> </span><span class="c1"># Cleanup: Stops and removes the local GitLab container</span>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>gitlab-local<span class="w"> </span>up<span class="w"> </span><span class="c1"># Starts Enterprise Edition (EE) by default</span>
+uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>gitlab-local<span class="w"> </span>down<span class="w"> </span><span class="c1"># Cleanup: Stops and removes the local GitLab container</span>
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Use <code>uv run gitlab-local up --gitlab-flavor ce</code> to test against Community Edition.</p>
+<p>Use <code>uv run glf-dev gitlab-local up --gitlab-flavor ce</code> to test against Community Edition.</p>
 </div>
 <p>To see all available infrastructure management options:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>gitlab-local<span class="w"> </span>up<span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>gitlab-local<span class="w"> </span>up<span class="w"> </span>--help
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Testing against specific versions</p>
-<p>You can test against specific GitLab releases using the version flag: <code>uv run gitlab-local up --gitlab-version 17.5.0-ee</code>.</p>
+<p>You can test against specific GitLab releases using the version flag: <code>uv run glf-dev gitlab-local up --gitlab-version 17.5.0-ee</code>.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Testing paid features</p>
@@ -1999,61 +1995,61 @@ uv<span class="w"> </span>run<span class="w"> </span>gitlab-local<span class="w"
 </li>
 <li>
 <p>Run the tests</p>
-<p>Once the GitLab instance is healthy and accessible, execute the acceptance located in <code>tests/acceptance/</code> directory. See the examples above on how to run the tests.</p>
+<p>Once the GitLab instance is healthy and accessible, execute the acceptance tests located in the <code>tests/acceptance/</code> directory. See the examples above on how to run the tests.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>Acceptance tests are usually slower than unit tests since they run against a real GitLab instance. This involves creating, updating, and deleting resources in GitLab. You may find it helpful to run only select tests instead of entire test suite. For example: run all tests related to the feature you're working on.</p>
+<p>Acceptance tests are usually slower than unit tests since they run against a real GitLab instance. This involves creating, updating, and deleting resources in GitLab. You may find it helpful to run only select tests instead of the entire suite. For example: run all tests related to the feature you're working on.</p>
 </div>
 </li>
 </ol>
 <h3 id="using-a-remote-gitlab-instance">Using a Remote GitLab Instance<a class="headerlink" href="#using-a-remote-gitlab-instance" title="Permanent link">&para;</a></h3>
-<p>It's not recommended, but if you prefer to run tests against non-local/disposable GitLab instance, provide the credentials via environment variables:</p>
+<p>It's not recommended, but if you prefer to run tests against a non-local/disposable GitLab instance, provide the credentials via environment variables:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">GITLAB_URL</span><span class="o">=</span><span class="s2">"https://mygitlab.company.com"</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">GITLAB_TOKEN</span><span class="o">=</span><span class="s2">"&lt;admin_api_token&gt;"</span>
-uv<span class="w"> </span>run<span class="w"> </span>qa<span class="w"> </span><span class="nb">test</span><span class="w"> </span>tests/acceptance
+uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>qa<span class="w"> </span><span class="nb">test</span><span class="w"> </span>tests/acceptance
 </code></pre></div>
 <h2 id="building-verification">Building &amp; Verification<a class="headerlink" href="#building-verification" title="Permanent link">&para;</a></h2>
 <p>This section covers creating the distributable artifacts for the project, including the Python package and the Docker image.</p>
 <h3 id="python-distributions">Python Distributions<a class="headerlink" href="#python-distributions" title="Permanent link">&para;</a></h3>
 <p>We generate standard Python distribution artifacts (source distribution and wheels) that can be uploaded to PyPI. To generate the artifacts in the <code>dist/</code> directory:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>package<span class="w"> </span>build
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>package<span class="w"> </span>build
 </code></pre></div>
 <p>To see available build options:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>package<span class="w"> </span>build<span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>package<span class="w"> </span>build<span class="w"> </span>--help
 </code></pre></div>
 <p>The <code>package verify</code> command performs an audit of the built files to ensure they are ready for release. This includes metadata validation via <code>twine</code>, content auditing via <code>check-wheel-contents</code>, and an automated smoke test that installs the wheel in a temporary isolated environment to check the entry point.</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>package<span class="w"> </span>verify
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>package<span class="w"> </span>verify
 </code></pre></div>
 <h3 id="docker-images">Docker Images<a class="headerlink" href="#docker-images" title="Permanent link">&para;</a></h3>
 <p>The Docker image is the recommended way to run GitLabForm in CI/CD environments.</p>
 <p>Before building a container image, make sure the Python wheel exists in <code>dist/</code>:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>package<span class="w"> </span>build
-uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </span>build
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>package<span class="w"> </span>build
+uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docker<span class="w"> </span>build
 </code></pre></div>
 <p>This requirement is intentional: the <code>Dockerfile</code> installs the packaged wheel, instead of rebuilding from the source code again. The <code>uv run docker build</code> command is the same local and CI entry point, but the GitHub Actions workflow passes explicit <code>--platform</code> values for multi-arch validation while local development typically targets the host architecture only.</p>
 <p>You can customize the image name and tag via arguments:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </span>build<span class="w"> </span>--tag<span class="w"> </span>my-registry/gitlabform:dev
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docker<span class="w"> </span>build<span class="w"> </span>--tag<span class="w"> </span>my-registry/gitlabform:dev
 </code></pre></div>
 <p>To see all Docker build options:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </span>build<span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docker<span class="w"> </span>build<span class="w"> </span>--help
 </code></pre></div>
 <p>To ensure the newly built image is functional, run a smoke test that executes the application version check inside a container:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </span>verify
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docker<span class="w"> </span>verify
 </code></pre></div>
 <p>To see options for Docker verification:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </span>verify<span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docker<span class="w"> </span>verify<span class="w"> </span>--help
 </code></pre></div>
 <h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
-<p>We use <strong>Zensical</strong> to generate our project documentation. The toolkit provides commands via the <code>docs</code> domain to preview changes locally and build the final static site.</p>
-<p>To serve the documentation with live-reloading (ideal for seeing your changes in real-time as you edit the markdown files):</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>docs<span class="w"> </span>serve
+<p>We use <strong>Zensical</strong> to generate our project documentation. The toolkit provides commands through the <code>docs</code> domain to preview changes locally and build the final static site.</p>
+<p>To serve the documentation with live-reloading (ideal for seeing your changes in real time as you edit the markdown files):</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docs<span class="w"> </span>serve
 </code></pre></div>
 <p>The site will be available at <code>http://localhost:8000</code>.</p>
 <p>To generate the static documentation site in the <code>site/</code> directory (used for deployment to GitHub Pages):</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>docs<span class="w"> </span>build
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docs<span class="w"> </span>build
 </code></pre></div>
 <p>To see all documentation management options:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>docs<span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docs<span class="w"> </span>--help
 </code></pre></div>
 
 
@@ -2109,7 +2105,7 @@ uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </sp
       <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.indexes"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e886cdf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.6970bfe9.min.js"></script>
       
     
   </body>
