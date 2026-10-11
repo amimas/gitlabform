@@ -2026,7 +2026,7 @@ uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </s
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>package<span class="w"> </span>build
 uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docker<span class="w"> </span>build
 </code></pre></div>
-<p>This requirement is intentional: the <code>Dockerfile</code> installs the packaged wheel, instead of rebuilding from the source code again. The <code>uv run docker build</code> command is the same local and CI entry point, but the GitHub Actions workflow passes explicit <code>--platform</code> values for multi-arch validation while local development typically targets the host architecture only.</p>
+<p>This requirement is intentional: the <code>Dockerfile</code> installs the packaged wheel, instead of rebuilding from the source code again. The <code>uv run glf-dev docker build</code> command is the same local and CI entry point, but the GitHub Actions workflow passes explicit <code>--platform</code> values for multi-arch validation while local development typically targets the host architecture only.</p>
 <p>You can customize the image name and tag via arguments:</p>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docker<span class="w"> </span>build<span class="w"> </span>--tag<span class="w"> </span>my-registry/gitlabform:dev
 </code></pre></div>

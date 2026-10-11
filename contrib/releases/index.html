@@ -1586,7 +1586,7 @@
 <li>create the corresponding <a href="https://github.com/gitlabform/gitlabform/releases">GitHub release</a> that references the new tag</li>
 <li>promote the already published SHA-tagged Docker image to release tags such as <code>vX.Y.Z</code>, <code>vX.Y</code>, and <code>vX</code> using <code>docker buildx imagetools create</code></li>
 </ul>
-<p>The immutable <code>sha-&lt;full-sha&gt;</code> and <code>sha-&lt;short-sha&gt;</code> Docker tags are created earlier, as part of the successful main-branch publication flow, and are not created as part of the version-tag release procedure itself.</p>
+<p>The <code>sha-&lt;full-sha&gt;</code> and <code>sha-&lt;short-sha&gt;</code> Docker tags are created earlier, as part of the successful main-branch publication flow, and are not created as part of the version-tag release procedure itself.</p>
 <p>The release workflow can also be triggered manually, in which case it requires a release version tag and the corresponding main workflow run id.</p>
 </li>
 <li>
