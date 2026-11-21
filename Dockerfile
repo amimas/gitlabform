@@ -1,5 +1,5 @@
 # ---- Builder Stage ----
-FROM python:3.14-alpine AS builder
+FROM python:3.15-alpine AS builder
 
 # Install uv binary directly
 COPY --from=ghcr.io/astral-sh/uv:0.11.2 /uv /uvx /bin/
@@ -24,7 +24,7 @@ RUN set -eux; \
     uv pip install --python /app/.venv/bin/python "$1"
 
 # ---- Final Stage ----
-FROM python:3.14-alpine AS final
+FROM python:3.15-alpine AS final
 
 LABEL org.opencontainers.image.title="GitLabForm" \
       org.opencontainers.image.description="GitLabForm is a declarative GitLab configuration management tool." \
